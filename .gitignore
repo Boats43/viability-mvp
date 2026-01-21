@@ -1,41 +1,73 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+import { NextResponse } from 'next/server';
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+export async function POST(request: Request) {
+  const body = await request.json();
+  const { alpha, entropyFloor, noiseLevel, horizon = 120, seed = 42 } = body;
 
-# testing
-/coverage
+  const n = 10;
+  let Q = Array.from({ length: n }, () => Math.random());
+  normalize(Q);
 
-# next.js
-/.next/
-/out/
+  const entropy: number[] = [];
+  const divergence: number[] = [];
+  const correction: number[] = [];
+  const viability: boolean[] = [];
 
-# production
-/build
+  let collapsed = false;
+  let collapseTime = null;
+  let failureReason: 'entropy' | 'correction' | null = null;
 
-# misc
-.DS_Store
-*.pem
+  for (let t = 0; t < horizon; t++) {
+    const P = Array.from({ length: n }, () => Math.random() + 0.3);
+    normalize(P);
 
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
+    const H = -Q.reduce((acc, p) => acc + p * Math.log(p), 0);
+    const D = Q.reduce((acc, q, i) => acc + q * Math.log(q / P[i]), 0);
+    const C = alpha * D;
 
-# env files (can opt-in for committing if needed)
-.env*
+    const isViable = C > D && H > entropyFloor;
 
-# vercel
-.vercel
+    entropy.push(H);
+    divergence.push(D);
+    correction.push(C);
+    viability.push(isViable);
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+    if (!isViable) {
+      collapsed = true;
+      collapseTime = t;
+      failureReason = H <= entropyFloor ? 'entropy' : 'correction';
+      break;
+    }
+
+    for (let i = 0; i < n; i++) {
+      Q[i] = Q[i] - alpha * (Q[i] - P[i]);
+      Q[i] += noiseLevel * (Math.random() - 0.5);
+      if (Q[i] < 0) Q[i] = 1e-6;
+    }
+
+    normalize(Q);
+  }
+
+  const avgDivergence = divergence.reduce((a, b) => a + b, 0) / divergence.length;
+  const maxEntropy = Math.max(...entropy);
+  const percentSurvived = collapsed ? Math.round((collapseTime! / horizon) * 100) : 100;
+
+  const summary = collapsed
+    ? `System collapsed at t=${collapseTime} due to ${failureReason}. Survived ${percentSurvived}% of horizon.`
+    : `System survived full horizon (${horizon} steps).`;
+
+  return NextResponse.json({
+    viable: !collapsed,
+    timeToCollapse: collapseTime,
+    failureReason,
+    maxEntropy,
+    avgDivergence,
+    percentSurvived,
+    summary
+  });
+}
+
+function normalize(v: number[]) {
+  const sum = v.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < v.length; i++) v[i] /= sum;
+}

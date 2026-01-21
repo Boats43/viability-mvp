@@ -22,6 +22,10 @@ ChartJS.register(
 );
 
 export default function ViabilityMVP() {
+  const [alpha, setAlpha] = useState(1.15);
+  const [entropyFloor, setEntropyFloor] = useState(0.6);
+  const [noiseLevel, setNoiseLevel] = useState(0.03);
+
   const [data, setData] = useState({
     divergence: [] as number[],
     correction: [] as number[],
@@ -31,11 +35,8 @@ export default function ViabilityMVP() {
   });
 
   useEffect(() => {
-    const T = 120;              // time horizon
-    const n = 10;               // state dimension
-    const alpha = 1.15;         // correction strength
-    const entropyFloor = 0.6;   // minimum entropy required
-    const noiseLevel = 0.03;    // environmental disturbance
+    const T = 120;
+    const n = 10;
 
     let Q = Array.from({ length: n }, () => Math.random());
     normalize(Q);
@@ -77,7 +78,7 @@ export default function ViabilityMVP() {
     }
 
     setData({ divergence, correction, entropy, viability, time });
-  }, []);
+  }, [alpha, entropyFloor, noiseLevel]);
 
   const chartData = {
     labels: data.time,
@@ -108,6 +109,45 @@ export default function ViabilityMVP() {
         <Line data={chartData} />
       </div>
 
+      <div className="bg-white p-4 rounded-xl shadow space-y-4">
+        <div>
+          <label>Correction Strength (alpha): {alpha.toFixed(2)}</label>
+          <input
+            type="range"
+            min="0.5"
+            max="2"
+            step="0.01"
+            value={alpha}
+            onChange={(e) => setAlpha(parseFloat(e.target.value))}
+            className="w-full"
+          />
+        </div>
+        <div>
+          <label>Entropy Floor (Hₘᵢₙ): {entropyFloor.toFixed(2)}</label>
+          <input
+            type="range"
+            min="0.1"
+            max="2.0"
+            step="0.01"
+            value={entropyFloor}
+            onChange={(e) => setEntropyFloor(parseFloat(e.target.value))}
+            className="w-full"
+          />
+        </div>
+        <div>
+          <label>Noise Level: {noiseLevel.toFixed(3)}</label>
+          <input
+            type="range"
+            min="0.0"
+            max="0.2"
+            step="0.001"
+            value={noiseLevel}
+            onChange={(e) => setNoiseLevel(parseFloat(e.target.value))}
+            className="w-full"
+          />
+        </div>
+      </div>
+
       <div className="bg-white p-4 rounded-xl shadow text-lg">
         <strong>Final Status:</strong>{" "}
         {data.viability.length
@@ -123,4 +163,4 @@ export default function ViabilityMVP() {
 function normalize(v: number[]) {
   const sum = v.reduce((a, b) => a + b, 0);
   for (let i = 0; i < v.length; i++) v[i] /= sum;
-}
+} 

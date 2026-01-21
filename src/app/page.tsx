@@ -34,6 +34,9 @@ export default function ViabilityMVP() {
     time: [] as number[],
   });
 
+  /* -------------------------------
+      SIMULATION
+  --------------------------------*/
   useEffect(() => {
     const T = 120;
     const n = 10;
@@ -65,10 +68,12 @@ export default function ViabilityMVP() {
 
       if (!isViable) break;
 
+      // correction step
       for (let i = 0; i < n; i++) {
         Q[i] = Q[i] - alpha * (Q[i] - P[i]);
       }
 
+      // add noise
       for (let i = 0; i < n; i++) {
         Q[i] += noiseLevel * (Math.random() - 0.5);
         if (Q[i] < 0) Q[i] = 1e-6;
@@ -80,6 +85,9 @@ export default function ViabilityMVP() {
     setData({ divergence, correction, entropy, viability, time });
   }, [alpha, entropyFloor, noiseLevel]);
 
+  /* -------------------------------
+      CHART DATA
+  --------------------------------*/
   const chartData = {
     labels: data.time,
     datasets: [
@@ -101,14 +109,28 @@ export default function ViabilityMVP() {
     ],
   };
 
+  /* -------------------------------
+      RENDER
+  --------------------------------*/
   return (
     <div className="p-6 grid gap-6">
+
+      {/* 📘 EXPLANATORY INTRO BLOCK */}
+      <p className="text-md text-gray-700">
+        This simulator shows the boundary between <strong>persistence</strong> and{" "}
+        <strong>collapse</strong> for adaptive systems. A system remains viable only
+        if <em>correction exceeds divergence</em> and <em>internal variety (entropy)</em>
+        stays above a minimum threshold.
+      </p>
+
       <h1 className="text-3xl font-bold">Viability Law — Dynamic MVP</h1>
 
+      {/* 📈 CHART */}
       <div className="bg-white p-4 rounded-xl shadow">
         <Line data={chartData} />
       </div>
 
+      {/* 🎚️ SLIDERS */}
       <div className="bg-white p-4 rounded-xl shadow space-y-4">
         <div>
           <label>Correction Strength (alpha): {alpha.toFixed(2)}</label>
@@ -122,6 +144,7 @@ export default function ViabilityMVP() {
             className="w-full"
           />
         </div>
+
         <div>
           <label>Entropy Floor (Hₘᵢₙ): {entropyFloor.toFixed(2)}</label>
           <input
@@ -134,6 +157,7 @@ export default function ViabilityMVP() {
             className="w-full"
           />
         </div>
+
         <div>
           <label>Noise Level: {noiseLevel.toFixed(3)}</label>
           <input
@@ -148,6 +172,7 @@ export default function ViabilityMVP() {
         </div>
       </div>
 
+      {/* ✅ FINAL STATUS */}
       <div className="bg-white p-4 rounded-xl shadow text-lg">
         <strong>Final Status:</strong>{" "}
         {data.viability.length
@@ -156,6 +181,29 @@ export default function ViabilityMVP() {
             : "❌ Collapse (Failure Envelope)"
           : "Loading..."}
       </div>
+
+      {/* 🧩 COLLAPSE EXPLANATION PANEL */}
+      {data.viability.length > 0 && !data.viability.at(-1) && (
+        <div className="bg-white p-4 rounded-xl shadow text-red-600 text-md">
+          <h2 className="font-semibold mb-1">Collapse Explanation</h2>
+
+          <p>❌ <strong>Collapse at t = {data.time.length}</strong></p>
+
+          <p>
+            Reason:{" "}
+            {data.entropy.at(-1)! <= entropyFloor
+              ? `Entropy fell below minimum (H = ${data.entropy.at(-1)!.toFixed(2)} < ${entropyFloor})`
+              : `Correction insufficient (C = ${data.correction.at(-1)!.toFixed(2)} ≤ D = ${data.divergence.at(-1)!.toFixed(2)})`}
+          </p>
+
+          <p>
+            Interpretation:{" "}
+            {data.entropy.at(-1)! <= entropyFloor
+              ? "System lost adaptive variety faster than required for viability."
+              : "System drifted faster than correction could compensate."}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -163,4 +211,4 @@ export default function ViabilityMVP() {
 function normalize(v: number[]) {
   const sum = v.reduce((a, b) => a + b, 0);
   for (let i = 0; i < v.length; i++) v[i] /= sum;
-} 
+}

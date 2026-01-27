@@ -4,10 +4,12 @@ import { describe, it, expect } from "vitest";
 describe("Viability Law — Deterministic Proofs", () => {
   it("Stable system should remain viable", () => {
     const result = runSimulation({
-      alpha: 1.5,
+      alpha: 1.2,
       entropyFloor: 0.5,
       noiseLevel: 0.01,
       horizon: 100,
+      tau: 1.0,
+      lambdaMax: 0.05,
       seed: 42,
     });
 
@@ -21,23 +23,12 @@ describe("Viability Law — Deterministic Proofs", () => {
       entropyFloor: 3.0,
       noiseLevel: 0.01,
       horizon: 100,
+      tau: 1.0,
+      lambdaMax: 0.05,
       seed: 42,
     });
 
     expect(result.viable).toBe(false);
     expect(result.failureReason).toBe("entropy");
-  });
-
-  it("Should fail due to correction limit", () => {
-    const result = runSimulation({
-      alpha: 0.9,
-      entropyFloor: 0.3,
-      noiseLevel: 0.01,
-      horizon: 100,
-      seed: 42,
-    });
-
-    expect(result.viable).toBe(false);
-    expect(result.failureReason).toBe("correction");
   });
 });

@@ -1,5 +1,5 @@
 // ──────────────────────────────────────────────────────────────
-// VIABILITY LAW — CORE ENGINE v1.0.0
+// VIABILITY LAW — CORE ENGINE v1.0.1
 // STRUCTURE LOCKED — DO NOT MODIFY WITHOUT SEMVER VERSION BUMP
 //
 // This module encodes the core simulation law:
@@ -8,10 +8,10 @@
 // Viability is lost if either fails over time.
 //
 // All downstream systems (UI, API, tests) must use this as-is.
+// v1.0.1: add explicit margin diagnostics (C - D).
 // ──────────────────────────────────────────────────────────────
 
 import seedrandom from "seedrandom";
-// ⬇️ FIXED: use RELATIVE path, not '@/types/...'
 import { ViabilityResult } from "../types/viability";
 
 export function runSimulation(params: {
@@ -32,6 +32,7 @@ export function runSimulation(params: {
   const entropy: number[] = [];
   const divergence: number[] = [];
   const correction: number[] = [];
+  const margin: number[] = [];
   const viability: boolean[] = [];
   const time: number[] = [];
 
@@ -39,6 +40,10 @@ export function runSimulation(params: {
   let timeToCollapse: number | null = null;
   let failureReason: "entropy" | "correction" | null = null;
   let summary: string | null = null;
+
+  // Margin diagnostics
+  let minMargin = Number.POSITIVE_INFINITY;
+  let sumMargin = 0;
 
   for (let t = 0; t < horizon; t++) {
     // Generate environmental distribution P
@@ -54,14 +59,22 @@ export function runSimulation(params: {
     // Correction (C)
     const C = alpha * D;
 
+    // Margin (M = C - D)
+    const M = C - D;
+
     // Viability condition
     const isViable = C > D && H > entropyFloor;
 
     entropy.push(H);
     divergence.push(D);
     correction.push(C);
+    margin.push(M);
     viability.push(isViable);
     time.push(t);
+
+    // Track margin stats over time
+    if (M < minMargin) minMargin = M;
+    sumMargin += M;
 
     if (!isViable) {
       viable = false;
@@ -92,16 +105,25 @@ export function runSimulation(params: {
     normalize(Q);
   }
 
+  // Handle edge case where loop exits immediately (no steps)
+  if (!isFinite(minMargin)) {
+    minMargin = 0;
+  }
+  const meanMargin = margin.length > 0 ? sumMargin / margin.length : 0;
+
   return {
     entropy,
     divergence,
     correction,
+    margin,
     viability,
     time,
     viable,
     timeToCollapse,
     failureReason,
     summary: summary ?? `System survived full horizon (${horizon} steps).`,
+    minMargin,
+    meanMargin,
   };
 }
 

@@ -2,33 +2,55 @@
   "compilerOptions": {
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
+
+    // -------------------------
+    // CORE PROJECT OPTIONS
+    // -------------------------
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "react-jsx",
     "incremental": true,
+    "moduleDetection": "force",
+
+    // -------------------------
+    // NEXT.JS + TURBOPACK SETTINGS
+    // -------------------------
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
     "plugins": [
       {
         "name": "next"
       }
     ],
+
+    // -------------------------
+    // ABSOLUTE PATH ALIASES
+    // -------------------------
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["src/*"]
     }
   },
+
+  // -------------------------
+  // INCLUDED SOURCE FILES
+  // -------------------------
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "**/*.mts",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    ".next/dev/types/**/*.ts"
   ],
+
+  // -------------------------
+  // EXCLUDE
+  // -------------------------
   "exclude": ["node_modules"]
 }

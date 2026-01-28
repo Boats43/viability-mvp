@@ -34,3 +34,47 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+---
+
+## Viability Law Core Engine — v1.1.1
+
+This repository contains a **reference implementation** of the Viability Law core engine.
+
+### What this is
+
+A **discrete-time, necessary-condition viability monitor**.
+
+At each step, the system is viable **only if**:
+
+- divergence is shrinking fast enough to overcome **delay-amplified instability**, and
+- adaptive entropy remains above a minimum floor.
+
+If either condition fails, collapse is inevitable and the simulation stops.
+
+This engine:
+- does **not** predict the future,
+- does **not** guarantee stability,
+- does **not** optimize rewards or goals.
+
+It strictly enforces a **hard viability constraint**.
+
+### Core locations
+
+- Engine: src/shared/simulation.ts
+- Result contract: src/types/viability.ts
+- Tests: src/shared/simulation.test.ts
+- Reference specification: VIABILITY_ENGINE_REFERENCE.md
+
+The core engine is versioned and structure-locked as:
+
+> **Viability Law Core Engine — v1.1.1**
+
+Any logic change requires a **new semantic version**.
+
+### API usage
+
+POST:
+
+https://viability-mvp.vercel.app/api/viability
+

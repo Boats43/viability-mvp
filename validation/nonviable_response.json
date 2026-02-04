@@ -1,0 +1,26 @@
+﻿{
+    "entropy":  [
+                    1.9549403489814903
+                ],
+    "divergence":  [
+                       0.3675190984192894
+                   ],
+    "correction":  [
+                       0.3675190984192894
+                   ],
+    "margin":  [
+                   0
+               ],
+    "viability":  [
+                      false
+                  ],
+    "time":  [
+                 0
+             ],
+    "viable":  false,
+    "timeToCollapse":  0,
+    "failureReason":  "correction",
+    "summary":  "System could not respond to environmental divergence.",
+    "minMargin":  0,
+    "meanMargin":  0
+}

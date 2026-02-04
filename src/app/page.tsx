@@ -105,8 +105,6 @@ export default function Page() {
       <div className="flex flex-wrap gap-4 text-sm">
         <label><input type="radio" checked={mode === 'local'} onChange={() => setMode('local')} /> <span className="ml-1">Run Locally</span></label>
         <label><input type="radio" checked={mode === 'api'} onChange={() => setMode('api')} /> <span className="ml-1">Run via API</span></label>
-
-        {/* FIXED PRESET BLOCK */}
         {Object.keys(presets).map((key) => (
           <button
             key={key}
@@ -114,64 +112,45 @@ export default function Page() {
             title={`Preset: ${key}`}
             onClick={() => {
               const p = presets[key as keyof typeof presets];
-
               setAlpha(p.alpha);
               setEntropyFloor(p.entropyFloor);
               setNoiseLevel(p.noiseLevel);
-
-              if (key === 'stable' || key === 'fragile' || key === 'chaotic') {
-                setStatus(key as 'stable' | 'fragile' | 'chaotic');
-              } else {
-                setStatus(null);
-              }
             }}>
             Preset: {key.charAt(0).toUpperCase() + key.slice(1)}
           </button>
         ))}
-
-        <button onClick={exportJSON} className="px-3 py-1 rounded bg-blue-600 text-white ml-auto">
-          Export JSON
-        </button>
+        <button onClick={exportJSON} className="px-3 py-1 rounded bg-blue-600 text-white ml-auto">Export JSON</button>
       </div>
 
       <div className="space-y-4 bg-white p-4 rounded-xl shadow">
         <div>
-          <label className="block font-semibold" title="Higher alpha = stronger corrections">
-            Correction Strength (alpha): {alpha.toFixed(2)}
-          </label>
+          <label className="block font-semibold" title="Higher alpha = stronger corrections">Correction Strength (alpha): {alpha.toFixed(2)}</label>
           <input type="range" min="0.5" max="2.0" step="0.01" value={alpha} onChange={(e) => setAlpha(+e.target.value)} className="w-full" />
         </div>
         <div>
-          <label className="block font-semibold" title="Minimum required entropy for survival">
-            Entropy Floor (Hₘᵢₙ): {entropyFloor.toFixed(2)}
-          </label>
+          <label className="block font-semibold" title="Minimum required entropy for survival">Entropy Floor (Hₘᵢₙ): {entropyFloor.toFixed(2)}</label>
           <input type="range" min="0.1" max="3.0" step="0.01" value={entropyFloor} onChange={(e) => setEntropyFloor(+e.target.value)} className="w-full" />
         </div>
         <div>
-          <label className="block font-semibold" title="Noise level affects unpredictability">
-            Noise Level: {noiseLevel.toFixed(3)}
-          </label>
+          <label className="block font-semibold" title="Noise level affects unpredictability">Noise Level: {noiseLevel.toFixed(3)}</label>
           <input type="range" min="0" max="0.2" step="0.001" value={noiseLevel} onChange={(e) => setNoiseLevel(+e.target.value)} className="w-full" />
         </div>
       </div>
 
       <div className="bg-white p-4 rounded-xl shadow text-lg">
-        <strong>Final Status:</strong> {result ? result.viable ? '✅ Persistent (Viable)' : '❌ Collapse Detected' : 'Running...'}
+        <strong>Final Status:</strong>{' '}
+        {result ? (result.viable ? '✅ Persistent (Viable)' : '❌ Collapse Detected') : 'Running...'}
       </div>
 
-      {status && (
-        <div className="flex space-x-4 text-sm">
-          <span className={`px-2 py-1 rounded-full text-white ${
-            status === 'stable' ? 'bg-green-600' :
-            status === 'fragile' ? 'bg-yellow-500' :
-            'bg-red-600'
-          }`}>
-            {status === 'stable' ? 'Stable' :
-             status === 'fragile' ? 'Fragile' :
-             'Chaotic'}
-          </span>
-        </div>
-      )}
+      <div className="flex space-x-4 text-sm">
+        <span className={`px-2 py-1 rounded-full text-white ${
+          status === 'stable' ? 'bg-green-600' :
+          status === 'fragile' ? 'bg-yellow-500' :
+          'bg-red-600'
+        }`}>
+          {status === 'stable' ? 'Stable' : status === 'fragile' ? 'Fragile' : 'Chaotic'}
+        </span>
+      </div>
 
       {result && (
         <div className="text-sm text-gray-600">

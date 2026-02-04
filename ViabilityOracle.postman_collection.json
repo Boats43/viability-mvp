@@ -1,0 +1,97 @@
+﻿{
+  "info": {
+    "name": "Viability Oracle — Demo Suite",
+    "_postman_id": "c5c42e4b-0000-0000-0000-demo000000000",
+    "description": "Three canonical demos: Viable, Non-viable, and Viable-but-Blocked using /api/viability.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Viable — Stable System",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/viability",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "viability"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"alpha\": 1.05,\n  \"entropyFloor\": 0.5,\n  \"tau\": 0.1,\n  \"lambdaMax\": 0.12,\n  \"horizon\": 10,\n  \"entropy\": [0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9],\n  \"divergence\": [2.0,1.5,1.1,0.8,0.6,0.45,0.3,0.2,0.1,0.05],\n  \"seed\": 42\n}"
+        },
+        "description": "Expected: viable = true, decision = VIABLE_AND_ACCEPTABLE."
+      }
+    },
+    {
+      "name": "Non-viable — Correction Failure",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/viability",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "viability"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"alpha\": 0.9,\n  \"entropyFloor\": 0.5,\n  \"tau\": 1.0,\n  \"lambdaMax\": 0.25,\n  \"horizon\": 10,\n  \"entropy\": [0.75,0.74,0.73,0.72,0.71,0.70,0.69,0.68,0.67,0.66],\n  \"divergence\": [2.0,1.7,1.45,1.3,1.25,1.28,1.35,1.5,1.7,1.95],\n  \"seed\": 42\n}"
+        },
+        "description": "Expected: viable = false, failureReason = \"correction\"."
+      }
+    },
+    {
+      "name": "Viable-but-Blocked — Safety Veto",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/viability",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "viability"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"alpha\": 1.05,\n  \"entropyFloor\": 0.5,\n  \"tau\": 0.1,\n  \"lambdaMax\": 0.12,\n  \"horizon\": 10,\n  \"entropy\": [0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9,0.9],\n  \"divergence\": [2.0,1.5,1.1,0.8,0.6,0.45,0.3,0.2,0.1,0.05],\n  \"seed\": 42,\n  \"assessment\": {\n    \"safety\": false,\n    \"cost\": true,\n    \"goal\": true,\n    \"notes\": \"Fails safety review, otherwise viable.\"\n  }\n}"
+        },
+        "description": "Expected: viable = true, decision = VIABLE_BUT_BLOCKED."
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://viability-mvp.vercel.app"
+    }
+  ]
+}

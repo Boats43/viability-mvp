@@ -138,19 +138,16 @@ export default function Page() {
       </div>
 
       <div className="bg-white p-4 rounded-xl shadow text-lg">
-        <strong>Final Status:</strong>{' '}
-        {result ? (result.viable ? '✅ Persistent (Viable)' : '❌ Collapse Detected') : 'Running...'}
+        <strong>Final Status:</strong> {result ? result.viable ? '✅ Persistent (Viable)' : '❌ Collapse Detected' : 'Running...'}
       </div>
 
-      <div className="flex space-x-4 text-sm">
-        <span className={`px-2 py-1 rounded-full text-white ${
-          status === 'stable' ? 'bg-green-600' :
-          status === 'fragile' ? 'bg-yellow-500' :
-          'bg-red-600'
-        }`}>
-          {status === 'stable' ? 'Stable' : status === 'fragile' ? 'Fragile' : 'Chaotic'}
-        </span>
-      </div>
+      {status && (
+        <div className="flex space-x-4 text-sm">
+          <span className={`px-2 py-1 rounded-full text-white ${status === 'stable' ? 'bg-green-600' : status === 'fragile' ? 'bg-yellow-500' : 'bg-red-600'}`}>
+            {status === 'stable' ? 'Stable' : status === 'fragile' ? 'Fragile' : 'Chaotic'}
+          </span>
+        </div>
+      )}
 
       {result && (
         <div className="text-sm text-gray-600">

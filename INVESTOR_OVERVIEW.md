@@ -1,90 +1,81 @@
-﻿# Viability Law Core Engine — Investor Overview (v1.1.1)
+﻿# Viability Oracle — Overview
 
-## 1. What this is
+## What This System Does
 
-The Viability Law Core Engine is a **mathematical safety constraint** for adaptive systems.
+This system is a **viability oracle** for AI and complex systems.
 
-It answers a single hard question:
+Given a description of how a system drifts away from its goal (divergence) and how much adaptive capacity it has (entropy), the oracle answers a single question:
 
-Is this system still inside a region where survival is mathematically possible,
-or has it already crossed into inevitable failure?
+> Is this system **structurally capable of surviving** under bounded delay and worst-case conditions?
 
-This engine:
-- does NOT predict the future
-- does NOT optimize rewards
-- does NOT perform learning
-
-It enforces a **hard viability boundary**.
+It returns a **hard yes or no** — no heuristics, no probabilities.
 
 ---
 
-## 2. What exists today (Phase 1 — COMPLETE)
+## What Exists Today (MVP Scope)
 
-### Core engine
-- File: src/shared/simulation.ts
-- Version: Viability Law Core Engine — v1.1.1
-- Status: Structure-locked reference implementation
+- ✅ **Mathematical Core**
+  - A minimal law that defines when a system is viable or non-viable.
+  - Implemented as deterministic code (no learning, no tuning).
 
-At each time step, the system is viable ONLY IF:
+- ✅ **Engine Implementation**
+  - Computes divergence, correction, and margins over time.
+  - Enforces delay and an entropy floor (capacity to adapt).
 
-1) Rate condition:
-   -(dD + tau * lambdaMax) > 0
+- ✅ **API Endpoint**
+  - POST /api/viability
+  - Takes time series inputs and returns:
+    - iable (true/false)
+    - margin (safety margin over time)
+    - ailureReason (if non-viable)
+    - summary (plain-language explanation)
 
-2) Entropy condition:
-   H(Q_t) > entropyFloor
+- ✅ **Governance Wrapper**
+  - Optional external assessment:
+    - safety, cost, goal, 
+otes
+  - Adds decision labels:
+    - NON_VIABLE
+    - VIABLE_BUT_BLOCKED
+    - VIABLE_AND_ACCEPTABLE
 
-If either fails, collapse is inevitable.
-
----
-
-## 3. Public API
-
-POST https://viability-mvp.vercel.app/api/viability
-
-Example payload:
-
-{
-  "alpha": 1.0005,
-  "entropyFloor": 0.5,
-  "noiseLevel": 0.01,
-  "horizon": 200,
-  "tau": 1,
-  "lambdaMax": 0.1,
-  "seed": 42
-}
-
-Response includes:
-- viable
-- timeToCollapse
-- failureReason
-- full diagnostic time series
+- ✅ **Validation Packet**
+  - Fixed request/response pairs for:
+    - A clearly **viable** system
+    - A clearly **non-viable** system
+  - Can be replayed by any third party to confirm behavior.
 
 ---
 
-## 4. Proof artifacts
+## How It’s Used
 
-- alpha_1_0005_boundary.json
-- viability_alpha_1_005.json
+1. **Collect telemetry** from a system or AI training run:
+   - Divergence between desired vs actual behavior
+   - Entropy / capacity measure
+   - Delay / reaction time
+   - Instability estimate (growth rate of divergence)
 
-These are deterministic, reproducible proof artifacts
-demonstrating the viability boundary.
+2. **Send a JSON request** to the oracle:
+   - Either locally (http://localhost:3000/api/viability)
+   - Or via the deployed endpoint (Vercel)
 
----
-
-## 5. Why this matters
-
-Most systems optimize performance.
-Almost none enforce **mathematical survivability**.
-
-This engine provides a **hard safety constraint**
-analogous to a flight envelope or thermal limit.
+3. **Read the decision:**
+   - If iable = false: the system is structurally unable to survive under the given conditions.
+   - If iable = true: the system can, in principle, survive — then governance decides if it *should* be allowed.
 
 ---
 
-## 6. Current state
+## Positioning
 
-- Core engine complete
-- Public API live
-- Proof artifacts committed
-- Ready for productization (Phase 2)
+This is **not a chatbot** and not a generic ML model.
 
+It is a **structural safety filter** that:
+
+- Never over-claims safety
+- Is falsifiable (can be proven wrong with a counterexample)
+- Can be independently tested using the validation packet in /validation
+
+This is the foundation for:
+- AI training evaluation
+- System-level safety gates
+- Governance and compliance tooling

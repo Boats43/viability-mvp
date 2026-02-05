@@ -1,4 +1,4 @@
-// ──────────────────────────────────────────────────────────────
+﻿// ──────────────────────────────────────────────────────────────
 // VIABILITY LAW — CORE ENGINE v1.0.1
 // STRUCTURE LOCKED — DO NOT MODIFY WITHOUT SEMVER VERSION BUMP
 //
@@ -8,7 +8,7 @@
 // Viability is lost if either fails over time.
 //
 // All downstream systems (UI, API, tests) must use this as-is.
-// v1.0.1: add explicit margin diagnostics (C - D).
+// v1.0.1: add explicit margin diagnostics (C - D) and clearer summary.
 // ──────────────────────────────────────────────────────────────
 
 import seedrandom from "seedrandom";
@@ -111,6 +111,11 @@ export function runSimulation(params: {
   }
   const meanMargin = margin.length > 0 ? sumMargin / margin.length : 0;
 
+  // Clear, non-misleading summary
+  const defaultSummary = viable
+    ? `System survived full horizon (${horizon} steps).`
+    : `System failed at step ${timeToCollapse}.`;
+
   return {
     entropy,
     divergence,
@@ -121,7 +126,7 @@ export function runSimulation(params: {
     viable,
     timeToCollapse,
     failureReason,
-    summary: summary ?? `System survived full horizon (${horizon} steps).`,
+    summary: summary ?? defaultSummary,
     minMargin,
     meanMargin,
   };
